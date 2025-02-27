@@ -1,0 +1,140 @@
+/* General styles for body */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+
+/* Styling for the chat bubble button */
+#chat-bubble {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    width: 50px;
+    height: 50px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    font-size: 24px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    transition: transform 0.3s ease;
+}
+
+/* Main chatbot container */
+#chatbot-container {
+    position: fixed;
+    bottom: 70px;
+    right: 20px;
+    width: 350px;
+    height: 450px;
+    background-color: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    z-index: 9999;
+    display: none;
+    flex-direction: column;
+    overflow: hidden;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+/* Chat window styling */
+#chat-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+}
+
+/* Chatbox styling */
+#chatbox {
+    flex-grow: 1;
+    padding: 10px;
+    overflow-y: auto;
+    background-color: #f8f8f8;
+    border-bottom: 2px solid #eee;
+    margin-bottom: 10px;
+    box-sizing: border-box;
+}
+
+/* Input field styling */
+#user-input {
+    width: 100%;
+    padding: 10px;
+    border: none;
+    border-top: 2px solid #eee;
+    box-sizing: border-box;
+    outline: none;
+    font-size: 16px;
+}
+
+/* Button styling */
+#send-btn {
+    width: 100%;
+    padding: 10px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    cursor: pointer;
+    font-size: 16px;
+    box-sizing: border-box;
+}
+
+/* Hover effect for send button */
+#send-btn:hover {
+    background-color: #0056b3;
+}
+
+/* Message styling for user */
+.user {
+    background-color: #007bff;
+    color: white;
+    padding: 8px 12px;
+    border-radius: 15px;
+    margin: 5px 0;
+    text-align: right;
+    max-width: 80%;
+    align-self: flex-end;
+}
+
+/* Message styling for bot */
+.bot {
+    background-color: #f1f1f1;
+    color: #333;
+    padding: 8px 12px;
+    border-radius: 15px;
+    margin: 5px 0;
+    text-align: left;
+    max-width: 80%;
+    align-self: flex-start;
+}
+
+.close-btn {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    font-size: 20px;
+    background: transparent;
+    border: none;
+    color: #888;
+    cursor: pointer;
+}
+
+.close-btn:hover {
+    color: #333;
+}
+
+/* Animation for fade-in effect */
+@keyframes fadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+

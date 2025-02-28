@@ -1,102 +1,117 @@
-*{
+* {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
 }
+
 body, html {
-            
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            font-family: Arial, sans-serif;
-        }
-        #landingPage{
-            height: 100%vh;
-            width: 100vw;
-            padding-bottom: 5vw;
-        }
-.container {
-            display: flex;
-            flex-direction: column;
-            justify-content: space-around;
-            align-items: center;
-            height: 100vh;
-            padding: 20px;
-            padding-bottom: 0;
-            box-sizing: border-box;
-            overflow: hidden;
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    font-family: Arial, sans-serif;
 }
- h1 {
-    
+
+#landingPage {
+    height: 100vh; /* Corrected typo from 100%vh */
+    width: 100vw;
+    padding-bottom: 0; /* Removed padding-bottom */
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    width: 90%;
+    max-width: 500px;
+    background: #f7f3f9;
+    padding: 20px;
+    min-height: 100%; /* Ensure it adjusts properly */
+    margin: auto;
+    border-radius: 20px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+h1 {
+    margin: 0; /* Remove any default margin */
+    padding: 0;
     font-family: "press Start 2P";
     -webkit-text-stroke-width: 1px;
     -webkit-text-stroke-color: black;
-            color: #8756c1;
-            padding: 20px 0;
-            font-size: 44px;
-            text-align: center;
-            animation: animate 1s ease-in-out infinite;
- }
+    color: #8756c1;
+    font-size: 44px;
+    text-align: center;
+    animation: animate 1s ease-in-out infinite;
+    line-height: 1.2; /* Adjust line-height for spacing */
+}
 
-        p{
-            width: fit-content;
-            font-size: 25px;
-        }
-        .image-container {
-            width: 100%;
-            max-width: 300px;
-            aspect-ratio: 1 / 1;
-                display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 20px 0;
-        }
-        .image-container img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: cover;
-        }
-        .login-button {
-            color: #000000;
-            padding: 12px 20px;
-            font-size: 25px;
-            cursor: pointer;
-            border-radius: 20px   ;
-            border-color: #000000;
-            box-shadow: 0px 2px 2px rgb(0, 0, 0,0.5) ;    
-        }
-        h4 {
-            font-family: 'New Amsterdam', cursive; /* Change to your preferred font */
-            font-size: 25px; /* Adjust size as needed */
-            font-weight: bold; /* or 'normal', 'lighter', etc. */
-            color: #333; /* Change to your preferred color */
-            text-align: center; /* Center align the text */
-            animation: text 10s 1;
-          }
+p {
+    margin: 0; /* Remove any default margin */
+    padding: 0;
+    width: fit-content;
+    font-size: 25px;
+    line-height: 1.2; /* Adjust line-height for spacing */
+}
 
-@keyframes animate{
-    0%{
+.image-container {
+    width: 100%;
+    max-width: 300px;
+    aspect-ratio: 1 / 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin: 20px 0;
+}
+
+.image-container img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: cover;
+}
+
+.login-button {
+    color: #000000;
+    padding: 12px 20px;
+    font-size: 25px;
+    cursor: pointer;
+    border-radius: 20px;
+    border-color: #000000;
+    box-shadow: 0px 2px 2px rgb(0, 0, 0, 0.5);
+}
+
+h4 {
+    font-family: 'New Amsterdam', cursive;
+    font-size: 25px;
+    font-weight: bold;
+    color: #333;
+    text-align: center;
+    animation: text 10s 1;
+}
+
+@keyframes animate {
+    0% {
         transform: translateY(0px);
     }
-    10%{
+    10% {
         transform: translateY(-1px);
     }
-    20%{
+    20% {
         transform: translateY(-1px);
-
     }
-    30%{ 
+    30% {
         transform: translateY(0px);
     }
 }
-@keyframes text{
-    0%{
+
+@keyframes text {
+    0% {
         color: #8756c1;
     }
-    30%{
+    30% {
         letter-spacing: 2px;
     }
-    85%{
+    85% {
         letter-spacing: 1px;
     }
 }
+

@@ -93,7 +93,12 @@ const SafetyMeasures = () => {
           <ul>
             <li>Share experiences, report incidents, and help others stay safe.</li>
           </ul>
-          <button className="discussion-btn">Join the Discussion</button>
+          <button 
+  className="discussion-btn" 
+  onClick={() => window.open("https://womensafetywing.telangana.gov.in/sahas/support-forum/", "_blank")}
+>
+  Join the Discussion
+</button>
         </div>
 
         <div className="grid-item gadgets-section">

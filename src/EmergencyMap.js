@@ -170,9 +170,9 @@ const EmergencyMap = () => {
         <h2 className="map-title">Select Destination</h2>
         <select onChange={handleLocationChange} value={selectedLocation}>
           <option value="">Select a Location</option>
-          <option value="location1">Location 1</option>
-          <option value="location2">Location 2</option>
-          <option value="location3">Location 3</option>
+          <option value="location1">Location 1-Mapped</option>
+          <option value="location2">Location 2-Mapped</option>
+          <option value="location3">Location 3-Mapped</option>
         </select>
         <div ref={mapRef} id="emergency-map" style={{ height: "500px", width: "100%" }}></div>
       </div>

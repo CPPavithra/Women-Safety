@@ -22,7 +22,7 @@ function ProfilePage() {
     useEffect(() => {
         const fetchProfileData = async () => {
             try {
-                const response = await axios.get('http://localhost:5000/api/get-profile');
+                const response = await axios.get('https://she-curity.onrender.com/api/get-profile');
                 const data = response.data;
 
                 setProfilePicture(data.profilePicture || '');
@@ -55,7 +55,7 @@ function ProfilePage() {
                 const formData = new FormData();
                 formData.append('profilePicture', profilePicture);
 
-                const uploadResponse = await axios.post('http://localhost:5000/api/upload-profile-picture', formData, {
+                const uploadResponse = await axios.post('https://she-curity.onrender.com/api/upload-profile-picture', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data'
                     }
@@ -76,7 +76,7 @@ function ProfilePage() {
                 profilePicture: profilePicturePath,
             };
 
-            const saveResponse = await axios.post('http://localhost:5000/api/save-profile', profileData);
+            const saveResponse = await axios.post('https://she-curity.onrender.com/api/save-profile', profileData);
 
             alert(saveResponse.data.message);
         } catch (error) {

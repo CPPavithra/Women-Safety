@@ -38,7 +38,7 @@ const SOSButton = () => {
     // Fetch contact data when the component mounts
     const fetchContacts = async () => {
       try {
-        const response = await axios.get('http://localhost:5000/api/get-profile');
+        const response = await axios.get('https://she-curity.onrender.com/api/get-profile');
         const data = response.data;
 
         // Set contacts from profile data

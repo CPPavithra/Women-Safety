@@ -7,7 +7,7 @@ import HelpSignup from "./HelpSignup"; // Import HelpSignup component
 import ProfilePage from './ProfilePage';
 import OtherAlerts from './OtherAlerts';
 import SafetyMeasures from './SafetyMeasures';
-import NavigationPage from './NavigationPage'; 
+import NavigationPage from './EmergencyMap'; 
 import NavBar from './NavBar';// Import NavigationPage
 import './App.css';
 

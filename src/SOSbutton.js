@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios'; // Import axios
-import './SOSbutton.css'; // Import the CSS file
+import axios from 'axios';
+import './SOSbutton.css'; // Your CSS file
 import homeIcon from './images/home.png';
 import { sendAlertEmail } from "./emailService";
 import navigationIcon from './images/navigation.jpg';
 import profileIcon from './images/profile.png';
-import otherAlertsIcon from "./images/other_alerts.png"; // Replace with actual image path
+import otherAlertsIcon from "./images/other_alerts.png";
 import { startVideoRecording } from "./recordvideo.js";
-import safetyIcon from "./images/safety.png"; // Replace with actual image path
-import { Link } from 'react-router-dom'; 
-
-// Path to the siren sound file (you can use any siren sound in .mp3 format)
+import safetyIcon from "./images/safety.png";
+import { Link } from 'react-router-dom'; // Consider using NavLink for active styling
+import Navbar from './NavBar'; 
+// Path to the siren sound file
 import sirenSound from './siren.mp3';
 
-// Dummy image paths (replace with actual paths)
+// Dummy image paths
 import defaultProfilePic from './images/man.png';
 import callIcon from './images/call.png';
 
@@ -23,11 +23,8 @@ const SOSButton = () => {
   const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
-    // Initialize the audio object once
     const newAudio = new Audio(sirenSound);
     setAudio(newAudio);
-
-    // Clean up the audio object on component unmount
     return () => {
       newAudio.pause();
       newAudio.currentTime = 0;
@@ -35,45 +32,44 @@ const SOSButton = () => {
   }, []);
 
   useEffect(() => {
-    // Fetch contact data when the component mounts
     const fetchContacts = async () => {
       try {
         const response = await axios.get('https://she-curity.onrender.com/api/get-profile');
-        const data = response.data;
-
-        // Set contacts from profile data
-        setContacts(data.contacts || []);
+        setContacts(response.data.contacts || []);
       } catch (error) {
         console.error('Error fetching profile data:', error);
         alert('Failed to fetch profile data.');
       }
     };
-
     fetchContacts();
   }, []);
 
- 
+  
 const handleClick = async () => {
   if (!audio) return;
 
-  setPlaying(!playing);
-  if (!playing) {
+  const isNowPlaying = !playing;
+  setPlaying(isNowPlaying);
+
+  if (isNowPlaying) {
     audio.play();
     alert("SOS! Help is on the way!");
 
     try {
-startVideoRecording();
-      // **Send Email Alert**
+      startVideoRecording();
+      
       await sendAlertEmail({
         type: "SOS Alert",
-        location: "User's Current Location",
+        location: "User's Current Location", // You'll want to replace this with real location data
         details: "Emergency! Immediate help is required.",
-        recipientEmail: "cppavithra05@gmail.com", // Replace with dynamic recipient if needed
+        recipientEmail: "cppavithra05@gmail.com", 
       });
 
       console.log("SOS Email sent successfully!");
 
-      // **Trigger Bluetooth Alert**
+      // WARNING: This bluetooth call is a blocking popup and may have
+      // poor browser support (e.g., won't work on Safari/iPhone).
+      // Consider making this a separate, optional feature.
       const device = await navigator.bluetooth.requestDevice({
         acceptAllDevices: true,
         optionalServices: ["battery_service"],
@@ -82,7 +78,7 @@ startVideoRecording();
       console.log("Connected to device:", device.name);
       alertNearbyDevices();
     } catch (error) {
-      console.error("Error:", error);
+      console.error("Error during SOS actions:", error);
     }
   } else {
     audio.pause();
@@ -91,21 +87,17 @@ startVideoRecording();
 };
 
   const sendPushNotification = async () => {
-    // Replace with your backend API endpoint
+    // This function is defined but not currently called.
     try {
       const response = await fetch('https://your-server.com/send-notification', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           message: 'SOS Alert! Help is needed nearby!',
         }),
       });
 
-      if (!response.ok) {
-        throw new Error('Failed to send notification');
-      }
+      if (!response.ok) throw new Error('Failed to send notification');
       console.log('Push notification sent successfully');
     } catch (error) {
       console.error(error);
@@ -113,22 +105,29 @@ startVideoRecording();
   };
 
   const alertNearbyDevices = () => {
-    // This is a mock function to represent sending an alert to nearby devices
-    // In a real-world scenario, this could involve writing data to a Bluetooth GATT service
     alert('Alert sent to nearby devices via Bluetooth!');
   };
 
   const handleCall = (number) => {
-    // Logic to handle phone call
     alert(`Calling ${number}`);
+    // For a real app, you'd use:
+    // window.location.href = `tel:${number}`;
   };
 
   return (
     <div className="container">
-<button id="startRecording" style={{ display: "none" }}>Start Recording</button>
-      <button className="button" onClick={handleClick}>
+      {/* This button is hidden, but you call startVideoRecording. Is this intended? */}
+      <button id="startRecording" style={{ display: "none" }}>Start Recording</button>
+      
+      {/* **CHANGE 1:** Added the `playing` class dynamically.
+      */}
+      <button 
+        className={playing ? 'button playing' : 'button'} 
+        onClick={handleClick}
+      >
         {playing ? 'STOP' : 'SOS'}
       </button>
+
       <div className="contacts">
         <h3 className="priorities-heading">Your Priorities</h3>
         {contacts.length > 0 ? (
@@ -139,55 +138,24 @@ startVideoRecording();
                 <div className="contact-name">{contact.name}</div>
                 <div className="contact-number">{contact.phone}</div>
               </div>
-              <img
-                src={callIcon}
-                alt="Call"
-                className="call-icon"
-                onClick={() => handleCall(contact.phone)}
-              />
+              {/* **CHANGE 2:** Wrapped the icon in a <button> for better styling and accessibility.
+              */}
+              <button className="call-button" onClick={() => handleCall(contact.phone)}>
+                <img
+                  src={callIcon}
+                  alt="Call"
+                  className="call-icon"
+                />
+              </button>
             </div>
           ))
         ) : (
           <p>No contacts found.</p>
         )}
       </div>
-<div className="navbar">
-  <div className="nav-item">
-    <Link to="/" className="nav-link">
-      <img src={homeIcon} alt="Home" className="contact-image" />
-      <span className="nav-text">Home</span>
-    </Link>
-  </div>
-
-  <div className="nav-item">
-    <Link to="/navigation" className="nav-link">
-      <img src={navigationIcon} alt="Navigation" className="contact-image" />
-      <span className="nav-text">Navigation</span>
-    </Link>
-  </div>
-
-  <div className="nav-item">
-    <Link to="/profile" className="nav-link">
-      <img src={profileIcon} alt="Profile" className="contact-image" />
-      <span className="nav-text">Profile</span>
-    </Link>
-  </div>
-
-  <div className="nav-item">
-    <Link to="/other-alerts" className="nav-link">
-      <img src={otherAlertsIcon} alt="Other Alerts" className="contact-image" />
-      <span className="nav-text">Other Alerts <span style={{ color: "red" }}>!</span></span>
-    </Link>
-  </div>
-
-  <div className="nav-item">
-    <Link to="/safetymeasures" className="nav-link">
-      <img src={safetyIcon} alt="Safety Measures" className="contact-image" />
-      <span className="nav-text">Safety Measures</span>
-    </Link>
-  </div>
-</div>
+<Navbar />
     </div>
+
   );
 };
 

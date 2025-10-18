@@ -1,158 +1,139 @@
+/* Import the consistent font */
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;700&display=swap');
 
-/* General container for the map page */
+/* --- Full Page Container --- */
 .emergency-container {
- 
- display: flex;
+  display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  width: 90%;
-  max-width: 500px;
-  background: #f7f3f9;
-  padding: 20px;
   min-height: 100vh;
-  margin: auto;
-  border-radius: 20px;
-  box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-  margin-bottom: 200px;
-
+  background-color: #1A1D2F; /* Dark theme background */
+  color: #F0F0F0;
+  padding: 1rem;
+  padding-bottom: 100px; /* Safe area for the fixed navbar */
+  font-family: 'Poppins', sans-serif;
+  box-sizing: border-box;
 }
 
-/* Header with the back button and title */
+/* --- Header --- */
 header {
   width: 100%;
   display: flex;
-  justify-content: space-between;
   align-items: center;
-  padding: 10px;
-  background-color: white;
-  color: white;
+  justify-content: center; /* Center title by default */
+  position: relative; /* For absolute positioning of the back button */
+  padding: 1rem 0;
+  margin-bottom: 1rem;
 }
 
 .back-btn {
-  font-size: 24px;
-  background: none;
-  border: none;
-  color: white;
+  position: absolute;
+  left: 0;
+  background: #2A2D3F; /* Dark button background */
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: background-color 0.2s ease;
 }
 
-.medbay-title {
-  font-size: 24px;
-  font-weight: bold;
-  background-color: white;
+.back-btn:hover {
+  background-color: #3a3e52;
 }
 
-/* Container for the map and destination selection */
+.back-icon {
+  width: 24px;
+  height: 24px;
+  stroke: #FFFFFF; /* Icon color */
+}
+
+.header-title {
+  font-size: 1.25rem;
+  font-weight: 600;
+  color: #FFFFFF;
+  text-align: center;
+  padding: 0 50px; /* Add padding so title doesn't overlap back button */
+}
+
+/* --- Map Content Area --- */
 .map-container {
   width: 100%;
-  max-width: 800px;
-  margin: 20px 0;
-  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex-grow: 1; /* Take up remaining vertical space */
 }
 
 .map-title {
-  font-size: 20px;
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #B0B0B0;
   margin-bottom: 10px;
 }
 
-/* Dropdown for location selection */
+/* --- Custom Styled Dropdown --- */
 select {
-  font-size: 16px;
-  padding: 8px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 12px 40px 12px 20px; /* Padding for text and arrow */
   width: 100%;
-  max-width: 200px;
+  max-width: 400px;
   margin-bottom: 20px;
   cursor: pointer;
+  background-color: #2A2D3F; /* Dark background */
+  color: #FFFFFF;
+  border: 1px solid #444;
+  border-radius: 12px;
+  -webkit-appearance: none; /* Remove default styling */
+  -moz-appearance: none;
+  appearance: none;
+  /* Add a custom dropdown arrow (dark-theme friendly) */
+  background-image: url('data:image/svg+xml;utf8,<svg fill="white" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg"><path d="M7 10l5 5 5-5z"/></svg>');
+  background-repeat: no-repeat;
+  background-position: right 15px center;
+  background-size: 24px;
+  transition: border-color 0.2s ease;
 }
 
-/* Style for the map itself */
+select:hover {
+  border-color: #007BFF;
+}
+
+select:focus {
+  outline: none;
+  border-color: #007BFF;
+}
+
+/* --- Map Element --- */
 #emergency-map {
-  height: 500px;
+  height: 450px; /* Fixed height */
   width: 100%;
-  border: 1px solid #ccc;
+  max-width: 400px; /* Match the dropdown width */
+  border-radius: 15px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+  overflow: hidden; /* Ensures map tiles respect the border-radius */
+}
+
+/* --- Leaflet Popup Styling (Bonus) --- */
+.leaflet-popup-content-wrapper {
+  background-color: #2A2D3F;
+  color: #FFFFFF;
   border-radius: 8px;
 }
 
-/* Styling for the time and distance metrics */
-.metrics {
-  display: flex;
-  justify-content: space-between;
-  width: 100%;
-  max-width: 300px;
-  margin-top: 10px;
+.leaflet-popup-content {
+  font-family: 'Poppins', sans-serif;
 }
 
-.distance, .time {
-  font-size: 18px;
-  font-weight: bold;
+.leaflet-popup-tip {
+  background-color: #2A2D3F;
 }
 
-/* Path type and alert message */
-.path-type {
-  font-size: 16px;
-  margin-top: 10px;
-  color: #007bff;
-}
-
-.alert-message {
-  font-size: 16px;
-  margin-top: 10px;
-  color: #d9534f;
-}
-
-/* Buttons and status */
-.notification-buttons {
-  margin-top: 20px;
-}
-
-.destination-status {
-  margin-top: 10px;
-  font-size: 16px;
-  color: green;
-  font-weight: bold;
-}
-
-/* Styling for the selected destination */
-.destination-title {
-  font-size: 18px;
-  font-weight: bold;
-  margin-top: 20px;
-}
-
-/* OTP button styles */
-.navigate-button {
-  padding: 10px 20px;
-  font-size: 16px;
-  background-color: #007bff;
-  color: #fff;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  margin-top: 20px;
-  transition: background-color 0.3s;
-}
-
-.navigate-button:hover {
-  background-color: #0056b3;
-}
-
-.nav-link {
-  display: flex;
-  align-items: center;
-  text-decoration: none; /* Remove underline */
-  color: #ffffff; /* Set text color to black or your desired color */
-}
-
-.nav-link:hover,
-.nav-link:focus {
-  color: #007bff; /* Set color on hover/focus if needed */
-}
-
-.nav-link img.contact-image {
-  margin-right: 8px; /* Adjust margin if needed */
-}
-
-.nav-text {
-  font-size: 16px; /* Adjust font size if needed */
+/* Remove all old navbar styles as they are no longer needed */
+.navbar, .nav-item, .nav-link, .contact-image, .nav-text {
+  /* These are now handled by the Navbar component */
 }

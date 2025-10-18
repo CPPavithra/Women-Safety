@@ -1,19 +1,16 @@
-
 import React, { useEffect, useRef, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './EmergencyMap.css';
-import homeIcon from './images/home.png';
-import { sendAlertEmail } from "./emailService";
-import navigationIcon from './images/navigation.jpg';
-import profileIcon from './images/profile.png';
-import otherAlertsIcon from "./images/other_alerts.png"; // Replace with actual image path
-import { startVideoRecording } from "./recordvideo.js";
-import safetyIcon from "./images/safety.png"; // Replace with actual image path
-import { Link } from 'react-router-dom'; 
+import Navbar from './NavBar'; // Import the new Navbar component
 
-
+// SVG icon for the back button
+const BackIcon = () => (
+  <svg className="back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+  </svg>
+);
 const EmergencyMap = () => {
   const navigate = useNavigate();
   const mapRef = useRef(null);
@@ -93,11 +90,11 @@ const EmergencyMap = () => {
 
   };
 
-  const [selectedLocation, setSelectedLocation] = useState('');
+const [selectedLocation, setSelectedLocation] = useState('');
   const [currentNodes, setCurrentNodes] = useState([]);
 
   const customIcon = new L.Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149059.png",
+    iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149059.png", // This icon is fine
     iconSize: [25, 25],
     iconAnchor: [12, 24],
     popupAnchor: [0, -20],
@@ -112,13 +109,12 @@ const EmergencyMap = () => {
   useEffect(() => {
     // Initialize the map if not already done
     if (!mapInstanceRef.current && mapRef.current) {
-      // Initialize map at a generic location or the first location's coordinates
       const initialCoords = { lat: 12.8471595, lng: 80.0375678 };
       mapInstanceRef.current = L.map(mapRef.current).setView([initialCoords.lat, initialCoords.lng], 14);
 
-      // Add tile layer
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '© OpenStreetMap contributors'
+      // --- Use a Dark Mode Tile Layer ---
+      L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+        attribution: '© OpenStreetMap contributors & © CartoDB'
       }).addTo(mapInstanceRef.current);
     }
 
@@ -142,7 +138,7 @@ const EmergencyMap = () => {
 
       // Add polyline connecting all nodes
       const polylinePoints = currentNodes.map(node => [node.lat, node.lng]);
-      L.polyline(polylinePoints, { color: 'blue', weight: 2, opacity: 0.6 })
+      L.polyline(polylinePoints, { color: '#007BFF', weight: 3, opacity: 0.7 }) // Brighter blue
         .addTo(mapInstanceRef.current);
 
       // Add markers for each node
@@ -150,22 +146,30 @@ const EmergencyMap = () => {
         L.marker([node.lat, node.lng], { icon: customIcon })
           .addTo(mapInstanceRef.current)
           .bindPopup(`Node ${node.id}`)
-          .on('mouseover', function(e) {
+          .on('mouseover', function (e) {
             this.openPopup();
           })
-          .on('mouseout', function(e) {
+          .on('mouseout', function (e) {
             this.closePopup();
           });
       });
+
+      // Fit map to bounds of the polyline
+      if (polylinePoints.length > 0) {
+        mapInstanceRef.current.fitBounds(polylinePoints);
+      }
     }
-  }, [currentNodes]); // Run when currentNodes changes
+  }, [currentNodes, customIcon]); // Added customIcon dependency
 
   return (
     <div className="emergency-container">
       <header>
-        <button className="back-btn" onClick={() => navigate("/home")}>🏠</button>
-        <h1 className="medbay-title">GET THE SAFEST PATH</h1>
+        <button className="back-btn" onClick={() => navigate("/")}> {/* Navigate to home or -1 */}
+          <BackIcon />
+        </button>
+        <h1 className="header-title">GET THE SAFEST PATH</h1>
       </header>
+      
       <div className="map-container">
         <h2 className="map-title">Select Destination</h2>
         <select onChange={handleLocationChange} value={selectedLocation}>
@@ -174,48 +178,13 @@ const EmergencyMap = () => {
           <option value="location2">Location 2-Mapped</option>
           <option value="location3">Location 3-Mapped</option>
         </select>
-        <div ref={mapRef} id="emergency-map" style={{ height: "500px", width: "100%" }}></div>
+        <div ref={mapRef} id="emergency-map"></div>
       </div>
-<div className="navbar">
-  <div className="nav-item">
-    <Link to="/" className="nav-link">
-      <img src={homeIcon} alt="Home" className="contact-image" />
-      <span className="nav-text">Home</span>
-    </Link>
-  </div>
 
-  <div className="nav-item">
-    <Link to="/navigation" className="nav-link">
-      <img src={navigationIcon} alt="Navigation" className="contact-image" />
-      <span className="nav-text">Navigation</span>
-    </Link>
-  </div>
-
-  <div className="nav-item">
-    <Link to="/profile" className="nav-link">
-      <img src={profileIcon} alt="Profile" className="contact-image" />
-      <span className="nav-text">Profile</span>
-    </Link>
-  </div>
-
-  <div className="nav-item">
-    <Link to="/other-alerts" className="nav-link">
-      <img src={otherAlertsIcon} alt="Other Alerts" className="contact-image" />
-      <span className="nav-text">Other Alerts <span style={{ color: "red" }}>!</span></span>
-    </Link>
-  </div>
-
-  <div className="nav-item">
-    <Link to="/safetymeasures" className="nav-link">
-      <img src={safetyIcon} alt="Safety Measures" className="contact-image" />
-      <span className="nav-text">Safety Measures</span>
-    </Link>
-  </div>
-</div>
-
-          </div>
+      {/* Renders the new, consistent Navbar */}
+      <Navbar />
+    </div>
   );
 };
 
 export default EmergencyMap;
-

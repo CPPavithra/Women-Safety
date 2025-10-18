@@ -1,54 +1,84 @@
+/*
+  IMPORTANT: To prevent content from being hidden behind the fixed navbar,
+  add padding to the bottom of your main app container or body.
+  For example, in your main App.css:
+  
+  .your-main-app-content-wrapper {
+    padding-bottom: 80px; // Should be slightly more than the navbar height
+  }
+*/
+
+/* --- Main Navbar Container --- */
 .navbar {
   position: fixed;
-  bottom: 0;
+  bottom: 15px; /* Float slightly above the bottom edge */
   left: 50%;
   transform: translateX(-50%);
-  width: 100%;
-  max-width: 450px; /* Keeps it mobile-sized */
-  background: linear-gradient(135deg, #6a0dad, #b565a7);
+  width: 95%; /* Don't stretch fully edge-to-edge on mobile */
+  max-width: 450px; /* Max width for larger screens */
+  background-color: #2A2D3F; /* Consistent dark theme color */
   display: flex;
   justify-content: space-around;
-  padding: 12px 0;
-  border-radius: 20px 20px 0 0;
-  box-shadow: 0px -3px 15px rgba(0, 0, 0, 0.3);
+  align-items: center; /* Vertically center the content */
+  height: 65px; /* Set a fixed height */
+  padding: 0 10px; /* Horizontal padding */
+  border-radius: 20px; /* Fully rounded corners */
+  box-shadow: 0 5px 25px rgba(0, 0, 0, 0.3); /* Deeper, more subtle shadow */
+  border: 1px solid rgba(255, 255, 255, 0.1); /* Subtle border for glass effect */
+  z-index: 1000;
 }
 
-.nav-item {
+/* --- Navigation Links --- */
+.nav-link {
+  position: relative; /* Needed for the notification badge positioning */
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  text-align: center;
-  flex-grow: 1;
-}
-
-.nav-link {
   text-decoration: none;
-  color: white;
+  color: #B0B0B0; /* Default muted color for inactive icons */
   font-size: 12px;
-  font-weight: bold;
-  transition: 0.3s ease-in-out;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
+  font-weight: 500;
+  font-family: 'Poppins', sans-serif; /* Consistent modern font */
+  height: 100%;
+  width: 100%;
+  border-radius: 12px; /* Rounded corners for the active "pill" */
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
 }
 
+/* --- Active State Styling (from NavLink) --- */
+.nav-link.active {
+  color: #FFFFFF; /* Bright white for active text */
+  background-color: rgba(0, 123, 255, 0.2); /* Subtle blue "pill" background */
+}
+
+.nav-link:not(.active):hover {
+  color: #FFFFFF; /* Highlight on hover for inactive icons */
+}
+
+/* --- Icons and Text --- */
 .nav-icon {
-  width: 28px;
-  height: 28px;
+  width: 26px;
+  height: 26px;
   margin-bottom: 4px;
-  filter: drop-shadow(0px 0px 5px rgba(255, 255, 255, 0.4));
+  object-fit: contain;
 }
 
-/* Highlight effect on hover/click */
-.nav-link:hover,
-.nav-link:active {
-  transform: scale(1.1);
-  color: #ffd700; /* Gold highlight */
+.nav-text {
+  position: relative; /* Required for notification badge positioning */
+  display: inline-flex; /* Align text and badge */
+  align-items: center;
+  justify-content: center;
 }
 
-/* Add padding to body so content doesn’t hide behind navbar */
-.app-container {
-  padding-bottom: 70px;
+/* --- Notification Badge --- */
+.notification-badge {
+  position: absolute;
+  top: -2px; /* Position it relative to the text */
+  right: -8px;
+  width: 8px;
+  height: 8px;
+  background-color: #E63946; /* High-visibility red */
+  border-radius: 50%;
+  border: 1.5px solid #2A2D3F; /* Match the navbar background for a "cutout" look */
 }
-

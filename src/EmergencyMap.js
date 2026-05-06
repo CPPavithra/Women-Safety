@@ -1,124 +1,97 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import './EmergencyMap.css';
-import Navbar from './NavBar'; // Import the new Navbar component
+import Navbar from './NavBar';
 
-// SVG icon for the back button
 const BackIcon = () => (
-  <svg className="back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7"></path>
+  <svg className="back-icon" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 19l-7-7 7-7" />
   </svg>
 );
+
+const LocateIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+    <circle cx="12" cy="12" r="3" />
+    <path d="M12 2v3M12 19v3M2 12h3M19 12h3" />
+    <circle cx="12" cy="12" r="9" strokeDasharray="4 2" />
+  </svg>
+);
+
+const SearchIcon = () => (
+  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18">
+    <circle cx="11" cy="11" r="8" />
+    <line x1="21" y1="21" x2="16.65" y2="16.65" />
+  </svg>
+);
+
+// User location: blue pulsing circle
+const userLocationIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:18px;height:18px;
+    background:#4A90D9;
+    border:3px solid white;
+    border-radius:50%;
+    box-shadow:0 0 0 6px rgba(74,144,217,0.3);
+  "></div>`,
+  iconSize: [18, 18],
+  iconAnchor: [9, 9],
+});
+
+// Destination: red pin
+const destIcon = L.divIcon({
+  className: '',
+  html: `<div style="
+    width:14px;height:14px;
+    background:#e74c3c;
+    border:3px solid white;
+    border-radius:50%;
+    box-shadow:0 2px 6px rgba(0,0,0,0.4);
+  "></div>`,
+  iconSize: [14, 14],
+  iconAnchor: [7, 7],
+});
+
+function formatDistance(meters) {
+  return meters >= 1000
+    ? `${(meters / 1000).toFixed(1)} km`
+    : `${Math.round(meters)} m`;
+}
+
+function formatDuration(seconds) {
+  const mins = Math.round(seconds / 60);
+  if (mins < 60) return `${mins} min`;
+  return `${Math.floor(mins / 60)}h ${mins % 60}min`;
+}
+
 const EmergencyMap = () => {
   const navigate = useNavigate();
   const mapRef = useRef(null);
   const mapInstanceRef = useRef(null);
+  const userMarkerRef = useRef(null);
+  const destMarkerRef = useRef(null);
+  const routeLayerRef = useRef(null);
 
-  // Define different sets of nodes for each location
-  const locations = {
-    location1: [
-  { "id": 1, "lat": 12.820776, "lng": 80.037650 },
-  { "id": 2, "lat": 12.820914, "lng": 80.037716 },
-  { "id": 3, "lat": 12.820736, "lng": 80.037647 },
-  { "id": 4, "lat": 12.820580, "lng": 80.037602 },
-  { "id": 5, "lat": 12.821016, "lng": 80.037810 },
-  { "id": 6, "lat": 12.821010, "lng": 80.037790 },
-  { "id": 7, "lat": 12.820210, "lng": 80.036780 },
-  { "id": 8, "lat": 12.820183, "lng": 80.037063 },
-  { "id": 9, "lat": 12.819426, "lng": 80.036827 },
-  { "id": 10, "lat": 12.819287, "lng": 80.036718 },
-  { "id": 11, "lat": 12.819068, "lng": 80.037101 },
- { "id": 12, "lat": 12.818893, "lng": 80.037392 },
- { "id": 13, "lat": 12.818901, "lng": 80.037583 },
- { "id": 14, "lat": 12.8186978, "lng": 80.037959 },
- { "id": 15, "lat": 12.818621, "lng": 80.038574 },
- { "id": 16, "lat": 12.818453, "lng": 80.038955 },
- { "id": 17, "lat": 12.818309, "lng": 80.039214 }
+  const [userLocation, setUserLocation] = useState(null);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [suggestions, setSuggestions] = useState([]);
+  const [routeInfo, setRouteInfo] = useState(null);
+  const [status, setStatus] = useState('');
+  const [isLocating, setIsLocating] = useState(false);
+  const [isRouting, setIsRouting] = useState(false);
+  const suggestTimer = useRef(null);
 
-    ],
-    location2: [
-   { "id": 18, "lat": 12.820776, "lng": 80.037650 },
-  { "id": 19, "lat": 12.820914, "lng": 80.037716 },
-  { "id": 20, "lat": 12.820736, "lng": 80.037647 },
-  { "id": 21, "lat": 12.820580, "lng": 80.037602 },
-  { "id": 22, "lat": 12.821016, "lng": 80.037810 },
-  { "id": 23, "lat": 12.821010, "lng": 80.037790 },
-  { "id": 24, "lat": 12.821300, "lng": 80.038000 },
-  { "id": 25, "lat": 12.821700, "lng": 80.038400 },
-  { "id": 26, "lat": 12.822305, "lng": 80.038767 },
-  { "id": 27, "lat": 12.822100, "lng": 80.039100 },
-  { "id": 28, "lat": 12.821700, "lng": 80.039400 },
-  { "id": 29, "lat": 12.821200, "lng": 80.039700 },
-  { "id": 30, "lat": 12.820794, "lng": 80.041226 },
-  { "id": 31, "lat": 12.820500, "lng": 80.041000 },
-  { "id": 32, "lat": 12.820000, "lng": 80.040700 },
-  { "id": 33, "lat": 12.819500, "lng": 80.040300 },
-  { "id": 34, "lat": 12.819000, "lng": 80.040000 },
-  { "id": 35, "lat": 12.818600, "lng": 80.039700 },
-  { "id": 36, "lat": 12.818294, "lng": 80.039396 },
-  { "id": 37, "lat": 12.818309, "lng": 80.039214 }
-    ],
-    location3:
-[
-  { "id": 38, "lat": 12.820776, "lng": 80.037650 },
-  { "id": 39, "lat": 12.820914, "lng": 80.037716 },
-  { "id": 40, "lat": 12.820736, "lng": 80.037647 },
-  { "id": 41, "lat": 12.820580, "lng": 80.037602 },
-  { "id": 42, "lat": 12.821016, "lng": 80.037810 },
-  { "id": 43, "lat": 12.821010, "lng": 80.037790 },
-  { "id": 44, "lat": 12.820210, "lng": 80.036780 },
-  { "id": 45, "lat": 12.820183, "lng": 80.037063 },
-  { "id": 46, "lat": 12.819426, "lng": 80.036827 },
-  { "id": 47, "lat": 12.819287, "lng": 80.036718 },
-  { "id": 48, "lat": 12.819068, "lng": 80.037101 },
- { "id": 49, "lat": 12.818893, "lng": 80.037392 },
- { "id": 50, "lat": 12.818901, "lng": 80.037583 },
- { "id": 51, "lat": 12.8186978, "lng": 80.037959 },
- { "id": 52, "lat": 12.818621, "lng": 80.038574 },
- { "id": 53, "lat": 12.818453, "lng": 80.038955 },
- { "id": 54, "lat": 12.818309, "lng": 80.039214 },
- { "id": 55, "lat": 12.818242, "lng": 80.039603 },
- { "id": 56, "lat": 12.817945, "lng": 80.039998 },
- { "id": 57, "lat": 12.818225, "lng": 80.040181 },
- { "id": 58, "lat": 12.818767, "lng": 80.040620 },
- { "id": 59, "lat": 12.818607, "lng": 80.040897 },
- { "id": 60, "lat": 12.818593, "lng": 80.041109 }
-
-],
-
-  };
-
-const [selectedLocation, setSelectedLocation] = useState('');
-  const [currentNodes, setCurrentNodes] = useState([]);
-
-  const customIcon = new L.Icon({
-    iconUrl: "https://cdn-icons-png.flaticon.com/512/149/149059.png", // This icon is fine
-    iconSize: [25, 25],
-    iconAnchor: [12, 24],
-    popupAnchor: [0, -20],
-  });
-
-  const handleLocationChange = (e) => {
-    const locationId = e.target.value;
-    setSelectedLocation(locationId);
-    setCurrentNodes(locations[locationId] || []);
-  };
-
+  // Initialize map once
   useEffect(() => {
-    // Initialize the map if not already done
     if (!mapInstanceRef.current && mapRef.current) {
-      const initialCoords = { lat: 12.8471595, lng: 80.0375678 };
-      mapInstanceRef.current = L.map(mapRef.current).setView([initialCoords.lat, initialCoords.lng], 14);
-
-      // --- Use a Dark Mode Tile Layer ---
+      mapInstanceRef.current = L.map(mapRef.current, { zoomControl: true }).setView([20.5937, 78.9629], 5);
       L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-        attribution: '© OpenStreetMap contributors & © CartoDB'
+        attribution: '© OpenStreetMap contributors & © CartoDB',
+        maxZoom: 19,
       }).addTo(mapInstanceRef.current);
     }
-
-    // Cleanup function
     return () => {
       if (mapInstanceRef.current) {
         mapInstanceRef.current.remove();
@@ -127,61 +100,209 @@ const [selectedLocation, setSelectedLocation] = useState('');
     };
   }, []);
 
-  useEffect(() => {
-    if (mapInstanceRef.current && currentNodes.length > 0) {
-      // Clear existing markers and polylines
-      mapInstanceRef.current.eachLayer(layer => {
-        if (layer instanceof L.Marker || layer instanceof L.Polyline) {
-          mapInstanceRef.current.removeLayer(layer);
-        }
-      });
-
-      // Add polyline connecting all nodes
-      const polylinePoints = currentNodes.map(node => [node.lat, node.lng]);
-      L.polyline(polylinePoints, { color: '#007BFF', weight: 3, opacity: 0.7 }) // Brighter blue
-        .addTo(mapInstanceRef.current);
-
-      // Add markers for each node
-      currentNodes.forEach((node) => {
-        L.marker([node.lat, node.lng], { icon: customIcon })
-          .addTo(mapInstanceRef.current)
-          .bindPopup(`Node ${node.id}`)
-          .on('mouseover', function (e) {
-            this.openPopup();
-          })
-          .on('mouseout', function (e) {
-            this.closePopup();
-          });
-      });
-
-      // Fit map to bounds of the polyline
-      if (polylinePoints.length > 0) {
-        mapInstanceRef.current.fitBounds(polylinePoints);
-      }
+  const locateUser = useCallback(() => {
+    if (!navigator.geolocation) {
+      setStatus('Geolocation is not supported by your browser.');
+      return;
     }
-  }, [currentNodes, customIcon]); // Added customIcon dependency
+    setIsLocating(true);
+    setStatus('Locating you…');
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        const { latitude: lat, longitude: lng } = pos.coords;
+        setUserLocation({ lat, lng });
+        setIsLocating(false);
+        setStatus('Location found. Now search for a destination.');
+
+        if (mapInstanceRef.current) {
+          if (userMarkerRef.current) userMarkerRef.current.remove();
+          userMarkerRef.current = L.marker([lat, lng], { icon: userLocationIcon })
+            .addTo(mapInstanceRef.current)
+            .bindPopup('You are here')
+            .openPopup();
+          mapInstanceRef.current.setView([lat, lng], 15);
+        }
+      },
+      (err) => {
+        setIsLocating(false);
+        setStatus(`Could not get location: ${err.message}`);
+      },
+      { enableHighAccuracy: true, timeout: 10000 }
+    );
+  }, []);
+
+  // Auto-locate on mount
+  useEffect(() => {
+    locateUser();
+  }, [locateUser]);
+
+  // Nominatim autocomplete
+  const handleSearchInput = (e) => {
+    const val = e.target.value;
+    setSearchQuery(val);
+    clearTimeout(suggestTimer.current);
+    if (val.length < 3) { setSuggestions([]); return; }
+    suggestTimer.current = setTimeout(async () => {
+      try {
+        const res = await fetch(
+          `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(val)}&format=json&limit=5&countrycodes=in`,
+          { headers: { 'Accept-Language': 'en' } }
+        );
+        const data = await res.json();
+        setSuggestions(data);
+      } catch {
+        setSuggestions([]);
+      }
+    }, 400);
+  };
+
+  const clearRoute = () => {
+    if (routeLayerRef.current) {
+      routeLayerRef.current.remove();
+      routeLayerRef.current = null;
+    }
+    if (destMarkerRef.current) {
+      destMarkerRef.current.remove();
+      destMarkerRef.current = null;
+    }
+    setRouteInfo(null);
+  };
+
+  const handleSuggestionSelect = async (place) => {
+    setSuggestions([]);
+    setSearchQuery(place.display_name);
+    const destLat = parseFloat(place.lat);
+    const destLng = parseFloat(place.lon);
+
+    if (!userLocation) {
+      setStatus('Please enable location first to get directions.');
+      return;
+    }
+
+    clearRoute();
+    setIsRouting(true);
+    setStatus('Calculating safest walking route…');
+
+    // Place destination marker
+    if (mapInstanceRef.current) {
+      destMarkerRef.current = L.marker([destLat, destLng], { icon: destIcon })
+        .addTo(mapInstanceRef.current)
+        .bindPopup(place.display_name.split(',')[0])
+        .openPopup();
+    }
+
+    try {
+      const url =
+        `https://router.project-osrm.org/route/v1/foot/` +
+        `${userLocation.lng},${userLocation.lat};${destLng},${destLat}` +
+        `?overview=full&geometries=geojson`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+
+      if (data.code !== 'Ok' || !data.routes?.length) {
+        setStatus('No route found. Try a different destination.');
+        setIsRouting(false);
+        return;
+      }
+
+      const route = data.routes[0];
+      const coords = route.geometry.coordinates.map(([lng, lat]) => [lat, lng]);
+
+      if (mapInstanceRef.current) {
+        routeLayerRef.current = L.polyline(coords, {
+          color: '#4A90D9',
+          weight: 5,
+          opacity: 0.85,
+        }).addTo(mapInstanceRef.current);
+
+        mapInstanceRef.current.fitBounds(routeLayerRef.current.getBounds(), { padding: [40, 40] });
+      }
+
+      setRouteInfo({
+        distance: formatDistance(route.distance),
+        duration: formatDuration(route.duration),
+        destination: place.display_name.split(',')[0],
+      });
+      setStatus('');
+    } catch (err) {
+      setStatus('Routing failed. Please check your connection.');
+    } finally {
+      setIsRouting(false);
+    }
+  };
 
   return (
     <div className="emergency-container">
       <header>
-        <button className="back-btn" onClick={() => navigate("/")}> {/* Navigate to home or -1 */}
+        <button className="back-btn" onClick={() => navigate('/')}>
           <BackIcon />
         </button>
-        <h1 className="header-title">GET THE SAFEST PATH</h1>
+        <h1 className="header-title">SAFEST PATH</h1>
       </header>
-      
+
       <div className="map-container">
-        <h2 className="map-title">Select Destination</h2>
-        <select onChange={handleLocationChange} value={selectedLocation}>
-          <option value="">Select a Location</option>
-          <option value="location1">Location 1-Mapped</option>
-          <option value="location2">Location 2-Mapped</option>
-          <option value="location3">Location 3-Mapped</option>
-        </select>
-        <div ref={mapRef} id="emergency-map"></div>
+        {/* Search bar */}
+        <div className="search-wrapper">
+          <div className="search-row">
+            <div className="search-input-wrap">
+              <SearchIcon />
+              <input
+                type="text"
+                className="search-input"
+                placeholder="Search destination…"
+                value={searchQuery}
+                onChange={handleSearchInput}
+                onFocus={() => searchQuery.length >= 3 && setSuggestions(suggestions)}
+              />
+            </div>
+            <button
+              className="locate-btn"
+              onClick={locateUser}
+              disabled={isLocating}
+              title="Re-locate me"
+            >
+              <LocateIcon />
+            </button>
+          </div>
+
+          {suggestions.length > 0 && (
+            <ul className="suggestions-list">
+              {suggestions.map((s) => (
+                <li key={s.place_id} onClick={() => handleSuggestionSelect(s)}>
+                  <strong>{s.display_name.split(',')[0]}</strong>
+                  <span>{s.display_name.split(',').slice(1, 3).join(',')}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+
+        {/* Status message */}
+        {(status || isRouting) && (
+          <p className="map-status">{isRouting ? 'Calculating route…' : status}</p>
+        )}
+
+        {/* Route info card */}
+        {routeInfo && (
+          <div className="route-info-card">
+            <div className="route-info-dest">{routeInfo.destination}</div>
+            <div className="route-info-metrics">
+              <span className="route-metric">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><path d="M3 12h18M3 6h18M3 18h18"/></svg>
+                {routeInfo.distance}
+              </span>
+              <span className="route-metric">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="16" height="16"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                {routeInfo.duration} walking
+              </span>
+            </div>
+          </div>
+        )}
+
+        <div ref={mapRef} id="emergency-map" />
       </div>
 
-      {/* Renders the new, consistent Navbar */}
       <Navbar />
     </div>
   );

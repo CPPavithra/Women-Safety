@@ -160,35 +160,42 @@ const SafetyChatbot = ({ onClose }) => {
     setIsLoading(true);
 
     try {
-      const apiKey = ""; // Canvas will provide this
-      const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
-      
-      const systemInstruction = {
-        parts: [{ text: "You are 'She-Curity,' an empathetic and helpful AI assistant. Your purpose is to provide clear, concise, and supportive safety advice for women. Do not give medical or legal advice. Be calming and empowering in your tone." }]
-      };
-      
+      const apiKey = process.env.REACT_APP_CEREBRAS_API_KEY || "";
+      const history = [...messages, { sender: 'user', text: messageText }];
       const payload = {
-        contents: [{ role: "user", parts: [{ text: messageText }] }],
-        systemInstruction: systemInstruction
+        model: "llama3.1-8b",
+        messages: [
+          {
+            role: "system",
+            content: "You are 'She-Curity,' an empathetic and helpful AI assistant. Your purpose is to provide clear, concise, and supportive safety advice for women. Do not give medical or legal advice. Be calming and empowering in your tone.",
+          },
+          ...history.map(m => ({ role: m.sender === 'user' ? 'user' : 'assistant', content: m.text })),
+        ],
       };
 
-      const response = await fetch(apiUrl, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+      const response = await fetch("https://api.cerebras.ai/v1/chat/completions", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${apiKey}`,
+        },
+        body: JSON.stringify(payload),
       });
 
+      const result = await response.json();
+
       if (!response.ok) {
-        throw new Error(`API error: ${response.statusText}`);
+        throw new Error(`API error ${response.status}: ${result?.message || response.statusText}`);
       }
 
-      const result = await response.json();
-      const botReply = result.candidates?.[0]?.content?.parts?.[0]?.text || "I'm sorry, I'm having trouble responding right now. Please try again later.";
-      
+      const botReply = result.choices?.[0]?.message?.content || "I'm sorry, I'm having trouble responding right now.";
       setMessages(prev => [...prev, { sender: 'bot', text: botReply }]);
     } catch (error) {
-      console.error("Gemini API call failed:", error);
-      setMessages(prev => [...prev, { sender: 'bot', text: "My apologies, I couldn't connect to my services. Please check your connection and try again." }]);
+      console.error("Cerebras API call failed:", error);
+      const errMsg = error.message?.includes("API error")
+        ? `Service error: ${error.message}`
+        : "My apologies, I couldn't connect. Please check your connection and try again.";
+      setMessages(prev => [...prev, { sender: 'bot', text: errMsg }]);
     } finally {
       setIsLoading(false);
     }
